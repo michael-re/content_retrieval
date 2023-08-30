@@ -25,9 +25,9 @@ import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 
 public class AppGui extends JFrame {
-    private final static int       IMAGES_PER_PAGE = 20;
-    private final static Color     BUTTON_COLOR    = new Color(243, 250, 254);
-    private final static Font      DEFAULT_FONT    = new Font("Helvetica", Font.BOLD, 14);
+    private final static int   IMAGES_PER_PAGE = 20;
+    private final static Color BUTTON_COLOR    = new Color(243, 250, 254);
+    private final static Font  DEFAULT_FONT    = new Font("Helvetica", Font.BOLD, 14);
 
     private JPanel topPanel;
     private JPanel bottomPanel;
