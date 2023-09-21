@@ -138,8 +138,6 @@ public class AppGui extends JFrame {
     }
 
     private void createNavigationAndOptionButtons() {
-        // TODO: refactor later?? -- seems a little long
-
         // create components
         final var optionsPanel       = new JPanel();
         final var navigationPanel    = new JPanel();

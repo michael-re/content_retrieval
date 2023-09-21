@@ -1,6 +1,5 @@
 package cbir;
 
-import java.awt.Color;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -236,10 +235,9 @@ public class Histogram {
     public static Double[] intensityHistogram(final List<Integer> colors) {
         final var histogram = Utility.doubleArray(25, 0);
         for (final var value : colors) {
-            final var color     = new Color(value);
-            final var red       = RED_INTENSITY   * color.getRed();
-            final var green     = GREEN_INTENSITY * color.getGreen();
-            final var blue      = BLUE_INTENSITY  * color.getBlue();
+            final var red       = RED_INTENSITY   * ((value >> 16) & 0xFF);
+            final var green     = GREEN_INTENSITY * ((value >>  8) & 0xFF);
+            final var blue      = BLUE_INTENSITY  * (value & 0xFF);
             final var intensity = Math.min(240, (int) (red + green + blue));
             histogram[intensity / 10]++;
         }
@@ -279,10 +277,9 @@ public class Histogram {
     public static Double[] colorCodeHistogram(final List<Integer> colors) {
         final var histogram = Utility.doubleArray(64, 0);
         for (final var value : colors) {
-            final var color = new Color(value);
-            final var red   = color.getRed()   >> 6;
-            final var green = color.getGreen() >> 6;
-            final var blue  = color.getBlue()  >> 6;
+            final var red   = ((value >> 16) & 0xFF) >> 6;
+            final var green = ((value >>  8) & 0xFF) >> 6;
+            final var blue  = (value & 0xFF)         >> 6;
             final var code  = (red << 4) | (green << 2) | blue;
             histogram[code]++;
         }

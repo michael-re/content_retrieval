@@ -1,20 +1,26 @@
 # Content-Based Image Retrieval System with Relevance Feedback
 
+## Table Of Contents
+  - [Description](#description)
+  - [Getting Started](#getting-started)
+  - [Background: Histograms](#background-histograms)
+    - [Intensity Method](#intensity-method)
+    - [Color-Code Method](#color-code-method)
+    - [Histogram Comparison](#histogram-comparison)
+  - [Background: Relevance Feedback](#background-relevance-feedback)
+    - [Normalization](#normalization)
+    - [Distance Metric: Modified L1](#distance-metric-modified-l1)
+    - [Weight Calculation](#weight-calculation)
+
 ## Description
 
-This project implements a simple Content-Based Image Retrieval (CBIR) system
-that utilizes color histogram comparison techniques, specifically focusing on
-two methods: Intensity method and Color-Code method. These methods transform
-color values into histogram, which serve as the basis for the image comparison.
-The system also incorporates a simplified relevance feedback mechanism to
-enhance retrieval results.
-
-## Table of Contents
-
-- [Getting Started](#getting-started)
-- [Color Histogram](#color-histogram)
-- [Histogram Comparison](#histogram-comparison)
-- [Relevance Feedback](#relevance-feedback)
+This repo contains my implementation of a simple Content-Based Image Retrieval
+(CBIR) system for a multimedia data processing class I took. The project
+centered on the utilization of color histogram comparison techniques, with a
+specific emphasis on the intensity and color-code methods. These techniques
+involve the transformation of color values into histograms, which serve as the
+basis for image comparison. The system also incorporates a simplified relevance
+feedback mechanism to enhance retrieval results.
 
 ## Getting Started
 
@@ -39,18 +45,20 @@ Follow the steps below to compile and run the program:
     java cbir.Main
     ```
 
-Alternatively, you can open and run the project using an IDE such as CLion.
+Alternatively, you can open and run the project using an IDE such as
+[`IntelliJ`](https://www.jetbrains.com/idea/) or [`Eclipse`](https://eclipseide.org/).
 
-## Color Histogram
+## Background: Histograms
 
-### Intensity
+### Intensity Method
 
-The Intensity method combines the 24-bit RGB color (8 bits per channel) into a
-single intensity value using the formula:
+The intensity method combines the 24-bit RGB color (8 bits per channel) into a
+single intensity value using the following formula:
 
 $Intensity = 0.299R + 0.587G + 0.114B$
 
-The histogram bins for this method are defined as follows:
+By transforming the 24-bit RGB color into a single 8-bit value, 25 histogram
+bins can be defined as follows:
 
 - `H01: I ∈ [000,010)`
 - `H02: I ∈ [010,020)`
@@ -58,15 +66,18 @@ The histogram bins for this method are defined as follows:
 - `...`
 - `H25: I ∈ [240,255)`
 
-### Color-Code
+---
 
-The Color-Code method transforms the 24-bit RGB color intensities into a 6-bit
+### Color-Code Method
+
+The color-code method transforms the 24-bit RGB color intensities into a 6-bit
 color code. It accomplishes this by extracting the two most significant bits
-from each color component, as illustrated in the figure below.
+from each color channel, as illustrated in the figure below.
 
-![illustration](docs/_media/fig_colorcode.png)
+![figure i: color-code illustration](docs/_media/fig_colorcode.png)
 
-This configuration of the 6-bit color code yields 64 histogram bins.
+By transforming the 24-bit RGB color into a single 6-bit value, 64 histogram
+bins can be defined as follows:
 
 - `H01: 000000`
 - `H02: 000001`
@@ -74,19 +85,20 @@ This configuration of the 6-bit color code yields 64 histogram bins.
 - `...`
 - `H64: 111111`
 
-For instance, to compute the color code value for the RGB color `(128, 0, 255)`,
-follow these steps:
+The table below shows how to compute the color-code value for the RGB color
+`(128, 0, 255)` by combining the two most significant bits of each channel.
 
 | Channel | Value | Channel Bitmap | Most Significant 2 bits |
 |---------|-------|----------------|-------------------------|
-| R       | `128` | `10000000`     | `10`                    |
-| G       | `000` | `00000000`     | `00`                    |
-| B       | `255` | `11111111`     | `11`                    |
+| R       | `128` | `10000000`     | `10` → `0b100000`       |
+| G       | `000` | `00000000`     | `00` → `0b000000`       |
+| B       | `255` | `11111111`     | `11` → `0b000011`       |
 
-Hence, the 6-bit color code value for `(128, 0, 255)` is `100011`, which is
-obtained by combining the two most significant bits of each channel.
+Hence, the 6-bit color-code value for `(128, 0, 255)` is `100011`
 
-## Histogram Comparison
+---
+
+### Histogram Comparison
 
 To determine how similar two images are, the distance metrics for histogram
 comparison is used. The difference between two images, denoted as $i$ and $k$,
@@ -97,22 +109,23 @@ the pixel count in each image. The calculation is as follows:
 
 # $D_{i,k} = \sum_j | \frac{H_i(j)}{M_i \times N_i} - \frac{H_k(j)}{M_k \times N_k} |$
 
-$`\text{Where:}`$
+$\text{Where:}$
 
 - $` M_i \times N_i = \text{the number of pixels in image } i. `$
 - $` M_k \times N_k = \text{the number of pixels in image } k. `$
 
-## Relevance Feedback
+---
+
+## Background: Relevance Feedback
 
 The Relevance Feedback mechanism enhances the retrieval process by incorporating
-user feedback and iteratively adjusting feature weights based on that input.
-
+user feedback and iteratively adjusting the feature weights based on that input.
 This project employs a simplified relevance feedback mechanism, comprising five
 phases:
 
-1. Combine intensity and color code histograms for each image and normalize the feature matrix.
-2. Gather user feedback: relevant and non-relevant images.
-3. Compute new weights using the feature (sub) matrix of images marked as relevant.
+1. Combine the intensity and color-code histograms for each image and normalize the feature matrix.
+2. Gather user feedback in the form of relevant and non-relevant images.
+3. Compute new weights using the feature (sub) matrix of the images marked relevant.
 4. Retrieval - apply the weights to each feature using values from step `3` to compute the distance matrix.
 5. Subsequent RF iterations:
     - Obtain feedback from the user.
@@ -121,57 +134,54 @@ phases:
 
 ### Normalization
 
-In the initial step of the RF process, intensity and color code histogram values
-are combined. Here, the bin values for each image are normalized by dividing the
-bin value by the image's size. Then, the entire feature matrix is normalized by applying the following formula:
+In the initial step of the RF process, the intensity and color-code histogram
+values are combined. Here, the bin values for each image are normalized by
+dividing the bin value by the image's size. Then, the entire feature matrix is
+normalized by applying the following formula:
 
 # $V_k = \left( \frac{V_k - \mu_k}{\sigma_k} \right)$
 
-where:
+where $\mu_k$ and $\sigma_k$ take on the following values because a subset of images are used:
 
 - $\mu_k = \text{average value of feature         } k.$
 - $\sigma_k = \text{standard deviation of feature } k.$
 
-Because a subset of images are used.
-
-Note: because a given that a subset of images are used during the RF process,
-      the sample standard deviation is employed when computing $\sigma_k$.
-
-## $\sigma_k = \sqrt{ \frac{ \sum \left(X_i - avg \right)^2 }{N - 1}}$
+> **_NOTE:_** given that a subset of images are used during the RF process, the sample standard deviation is employed when computing $\sigma_k$.
+>
+> ## $\sigma_k = \sqrt{ \frac{ \sum \left(X_i - avg \right)^2 }{N - 1}}$
 
 ### Distance Metric: Modified L1
 
 When calculating the distance between two images using RF analysis, a modified
-version of the Manhattan Distance formula is employed:
+version of the Manhattan Distance formula is used:
 
 ## $D(I, J) = \sum_i \omega_i \times | V_i(I) - V_i(J) |$
 
 This version of the Manhattan distance incorporates the weight assigned to each
 bin in the feature matrix. Moreover, the bins of the histogram are not
 normalized by dividing them by the image size, as the feature matrix has
-already been normalized in step `1`.
+already been normalized in step [`1 - normalization`](#normalization).
 
 ### Weight Calculation
 
-Weight values for each feature are calculated using the following formulas:
+For the initial query results, no bias is applied to the weights as they are all
+assigned the same value. To calculate this value, we use the following formula:
 
 **Initial weight value:**
 
 ## $W_i = \left( \frac{1}{\sigma_i} \right)$
 
+
+For subsequent queries where the user has provided feedback regarding image
+relevance. A normalized weight value is used for each feature.
+
 **Normalized weight value:**
 
 ## $W_i = \left( \frac{W_i}{\sum W_i} \right)$
 
-The normalized weight value is used in the RF analysis distance metric.
-For initial query results, no bias is applied to the weights as they are all
-assigned the same value. Weight values are only updated for subsequent queries
-where the user has provided feedback regarding image relevance.
-
-In cases where the standard deviation $\sigma_i$ for feature $i$ of all the
-relevant marked images is $0$, the following steps are taken when updating
-weight $W_i$ (where $m_i$ is the mean of feature $i$):
-
-- if $m_i = 0$, set $W_i = 0$
-- if $m_i \neq 0$, set $st_i$ = $\frac{min\{\sigma, \sigma \neq0\}}{2}$,
-  and calculate $W_i$ as usual.
+> **_NOTE:_** in cases where the standard deviation $\sigma_i$ for feature $i$
+> of all the relevant marked images is $0$, the following steps are taken when
+> updating weight $W_i$ (where $m_i$ is the mean of feature $i$):
+>
+> - if $m_i = 0$, set $W_i = 0$
+> - if $m_i \neq 0$, set $st_i$ = $\frac{min\{\sigma, \sigma \neq0\}}{2}$, and calculate $W_i$ as usual.
